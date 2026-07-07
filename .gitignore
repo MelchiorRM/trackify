@@ -1,0 +1,24 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+node_modules/
+dist/
+*.log
+
+# Local-only dev services (Postgres/Redis binaries+data, Chromium runtime
+# libs) — built/extracted locally without sudo, see scripts/local-services.sh.
+# Not portable across machines; never commit.
+.local-services/
+
+# Personal/local Claude Code permission settings — not shared project config.
+settings.local.json
+
+# Recommendation service: raw/processed datasets and trained model
+# artifacts (~870MB). Fully regenerable from recommendation/plan.txt
+# PROCEDURES (fetch.py -> preprocess.py -> embed.py -> train_*.py). Commit
+# code, not generated data — keep these out of git history.
+recommendation/data/
+recommendation/embeddings/
+recommendation/models/
