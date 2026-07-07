@@ -1,0 +1,16 @@
+requests
+tqdm
+loguru
+pandas
+numpy
+scipy
+scikit-learn
+jupyter
+matplotlib
+seaborn
+faiss-cpu
+implicit
+lightgbm
+python-dotenv
+fastapi
+uvicorn[standard]
