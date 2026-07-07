@@ -22,3 +22,7 @@ settings.local.json
 recommendation/data/
 recommendation/embeddings/
 recommendation/models/
+
+# Internal planning docs — not for the public repo.
+appPlan.txt
+recommendation/plan.txt
