@@ -1,0 +1,44 @@
+# Phase 1 skeleton — postgres, redis, and the web app only. rec-service
+# joins this file once recommendation/ has its own Dockerfile and the rec
+# client lands (Phase 5) — see appPlan.txt DOCKER COMPOSE for the full
+# final-deployment shape including rec-service.
+services:
+  postgres:
+    image: postgres:16
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: trackify
+      POSTGRES_USER: trackify
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trackify}
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  trackify-backend:
+    build: ./trackify-app/backend
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      DATABASE_URL: postgresql+asyncpg://trackify:${POSTGRES_PASSWORD:-trackify}@postgres:5432/trackify
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY}
+      TMDB_API_KEY: ${TMDB_API_KEY:-}
+      TMDB_BEARER_TOKEN: ${TMDB_BEARER_TOKEN:-}
+    ports:
+      - "8000:8000"
+
+  trackify-frontend:
+    build: ./trackify-app/frontend
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
