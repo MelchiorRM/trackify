@@ -1,0 +1,18 @@
+fastapi
+pydantic[email]
+uvicorn[standard]
+sqlalchemy[asyncio]>=2.0
+asyncpg
+alembic
+redis
+pydantic-settings
+python-jose[cryptography]
+bcrypt
+
+# dev / test only — production DB is Postgres (asyncpg above), production
+# cache is Redis. These let the test suite run without either installed.
+aiosqlite
+fakeredis
+pytest
+pytest-asyncio
+httpx
