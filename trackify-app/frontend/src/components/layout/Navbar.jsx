@@ -2,6 +2,7 @@ import { Compass } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { logout as logoutRequest } from '@/api/auth'
+import { SearchBar } from '@/components/common/SearchBar'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 
@@ -18,15 +19,18 @@ export default function Navbar() {
 
   return (
     <nav className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+      <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4">
         <Link to="/" className="flex items-center gap-2 text-lg font-bold tracking-tight">
           <Compass className="h-5 w-5 text-primary" />
           Trackify
         </Link>
-        {/* Global search bar lands in Phase 2 once GET /search exists */}
+        {user && <SearchBar />}
         <div className="flex items-center gap-3">
           {user ? (
             <>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/library">Library</Link>
+              </Button>
               <span className="text-sm text-muted-foreground">{user.username}</span>
               <Button onClick={handleLogout} variant="outline" size="sm">
                 Log out
