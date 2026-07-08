@@ -60,3 +60,15 @@ async def client(db_session, fake_redis):
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
+
+
+@pytest_asyncio.fixture
+async def auth_headers(client):
+    """A freshly-registered user's Authorization header, for tests that
+    don't care who the user is, just that they're logged in."""
+    resp = await client.post(
+        "/auth/register",
+        json={"username": "tester", "email": "tester@example.com", "password": "password123"},
+    )
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
