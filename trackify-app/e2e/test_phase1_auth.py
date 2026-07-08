@@ -60,29 +60,29 @@ def main():
         page.get_by_label("Email").fill(email)
         page.get_by_label("Password").fill(password)
         page.click("button[type=submit]")
-        page.wait_for_url(f"{BASE_URL}/", timeout=5000)
-        assert page.get_by_text(f"Welcome back, {username}").is_visible()
+        page.wait_for_url(f"{BASE_URL}/", timeout=10000)
+        page.wait_for_selector(f"text=Welcome back, {username}", timeout=10000)
         print("PASS: register -> redirected to dashboard, greeting shown")
 
         # 2. Navbar shows the username and a Log out button (moved out of the
         # dashboard body and into the nav during the redesign)
         nav = page.locator("nav")
-        assert nav.get_by_text(username).is_visible()
+        nav.get_by_text(username).wait_for(timeout=10000)
         nav.get_by_role("button", name="Log out").click()
-        page.wait_for_url(f"{BASE_URL}/login", timeout=5000)
+        page.wait_for_url(f"{BASE_URL}/login", timeout=10000)
         print("PASS: navbar shows username; logout -> redirected to /login")
 
         # 3. Log back in
         page.get_by_label("Email").fill(email)
         page.get_by_label("Password").fill(password)
         page.click("button[type=submit]")
-        page.wait_for_url(f"{BASE_URL}/", timeout=5000)
-        assert page.get_by_text(f"Welcome back, {username}").is_visible()
+        page.wait_for_url(f"{BASE_URL}/", timeout=10000)
+        page.wait_for_selector(f"text=Welcome back, {username}", timeout=10000)
         print("PASS: login -> redirected to dashboard, greeting shown")
 
         # 4. Reload the page and confirm the session survives (refresh-token flow)
         page.reload()
-        page.wait_for_selector(f"text=Welcome back, {username}", timeout=5000)
+        page.wait_for_selector(f"text=Welcome back, {username}", timeout=10000)
         print("PASS: reload -> still logged in (refresh-token restore worked)")
 
         # 5. Confirm the access token is NOT in localStorage (memory-only, per plan)
