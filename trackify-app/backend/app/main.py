@@ -1,11 +1,9 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .redis import redis_client
-from .routers import auth, users
-
+from .routers import auth, diary, items, library, reviews, search, users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -13,9 +11,7 @@ async def lifespan(app: FastAPI):
     yield
     await redis_client.aclose()
 
-
 app = FastAPI(title="Trackify API", lifespan=lifespan)
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -26,7 +22,11 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(users.router)
-
+app.include_router(search.router)
+app.include_router(items.router)
+app.include_router(library.router)
+app.include_router(diary.router)
+app.include_router(reviews.router)
 
 @app.get("/health")
 async def health() -> dict:
