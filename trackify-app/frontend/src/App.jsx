@@ -4,11 +4,15 @@ import { Route, Routes } from 'react-router-dom'
 
 import { fetchMe } from '@/api/auth'
 import { apiClient } from '@/api/client'
+import { RequireAuth } from '@/components/common/RequireAuth'
 import Navbar from '@/components/layout/Navbar'
 import Home from '@/pages/Home'
+import Item from '@/pages/Item'
+import Library from '@/pages/Library'
 import Login from '@/pages/Login'
 import NotFound from '@/pages/NotFound'
 import Register from '@/pages/Register'
+import SearchPage from '@/pages/Search'
 import { useAuthStore } from '@/store/authStore'
 
 export default function App() {
@@ -56,6 +60,30 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route
+          path="/search"
+          element={
+            <RequireAuth>
+              <SearchPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/library"
+          element={
+            <RequireAuth>
+              <Library />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/item/:domain/:externalId"
+          element={
+            <RequireAuth>
+              <Item />
+            </RequireAuth>
+          }
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
