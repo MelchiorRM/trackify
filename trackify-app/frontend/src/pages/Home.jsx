@@ -1,15 +1,9 @@
-import { BookOpen, Film, Music2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/store/authStore'
-
-const DOMAINS = [
-  { icon: Film, label: 'Movies' },
-  { icon: BookOpen, label: 'Books' },
-  { icon: Music2, label: 'Music' },
-]
+import { DOMAINS, DOMAIN_ICONS } from '@/utils/constants'
 
 export default function Home() {
   const user = useAuthStore((s) => s.user)
@@ -18,14 +12,17 @@ export default function Home() {
     return (
       <div className="mx-auto flex max-w-2xl flex-col items-center px-4 pt-24 text-center">
         <div className="mb-6 flex gap-3">
-          {DOMAINS.map(({ icon: Icon, label }) => (
-            <span
-              key={label}
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-accent-foreground"
-            >
-              <Icon className="h-5 w-5" />
-            </span>
-          ))}
+          {DOMAINS.map((domain) => {
+            const Icon = DOMAIN_ICONS[domain]
+            return (
+              <span
+                key={domain}
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-accent text-accent-foreground"
+              >
+                <Icon className="h-5 w-5" />
+              </span>
+            )
+          })}
         </div>
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Trackify</h1>
         <p className="mt-4 max-w-md text-lg text-muted-foreground">
