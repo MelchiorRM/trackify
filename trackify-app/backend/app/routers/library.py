@@ -19,16 +19,6 @@ _SORT_COLUMNS = {
 }
 
 
-async def _get_owned_library_row(db: AsyncSession, current_user: User, library_id: uuid.UUID) -> UserLibrary:
-    result = await db.execute(
-        select(UserLibrary).where(UserLibrary.id == library_id, UserLibrary.user_id == current_user.id)
-    )
-    library = result.scalar_one_or_none()
-    if library is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Library entry not found")
-    return library
-
-
 @router.get("", response_model=list[LibraryRead])
 async def list_library(
     domain: str | None = None,
@@ -82,7 +72,7 @@ async def update_library_entry(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> UserLibrary:
-    library = await _get_owned_library_row(db, current_user, library_id)
+    library = await library_service.get_owned_library_row(db, current_user, library_id)
     diary_entry = library_service.apply_updates(library, body.model_dump(exclude_unset=True))
     if diary_entry is not None:
         db.add(diary_entry)
@@ -97,6 +87,6 @@ async def remove_from_library(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> None:
-    library = await _get_owned_library_row(db, current_user, library_id)
+    library = await library_service.get_owned_library_row(db, current_user, library_id)
     await db.delete(library)
     await db.commit()

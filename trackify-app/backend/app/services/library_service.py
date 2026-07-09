@@ -1,7 +1,23 @@
+import uuid
 from datetime import date, datetime, timezone
+
+from fastapi import HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models.diary_entry import DiaryEntry
 from ..models.media_item import UserLibrary
+from ..models.user import User
+
+
+async def get_owned_library_row(db: AsyncSession, current_user: User, library_id: uuid.UUID) -> UserLibrary:
+    result = await db.execute(
+        select(UserLibrary).where(UserLibrary.id == library_id, UserLibrary.user_id == current_user.id)
+    )
+    library = result.scalar_one_or_none()
+    if library is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Library entry not found")
+    return library
 
 
 def log_diary_entry(
