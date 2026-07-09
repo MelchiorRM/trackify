@@ -1,9 +1,17 @@
+import { BookOpen, Film, Music2 } from 'lucide-react'
+
 export const DOMAINS = ['movie', 'book', 'music']
 
 export const DOMAIN_LABELS = {
   movie: 'Movies',
   book: 'Books',
   music: 'Music',
+}
+
+export const DOMAIN_ICONS = {
+  movie: Film,
+  book: BookOpen,
+  music: Music2,
 }
 
 export const STATUSES = ['want', 'in_progress', 'completed', 'dropped']
