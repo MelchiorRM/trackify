@@ -133,3 +133,29 @@ async def test_cannot_modify_another_users_library_entry(client, monkeypatch):
     headers_bob = {"Authorization": f"Bearer {bob.json()['access_token']}"}
     resp = await client.patch(f"/library/{library_id}", json={"status": "completed"}, headers=headers_bob)
     assert resp.status_code == 404
+
+
+async def test_cannot_delete_another_users_diary_entry(client, monkeypatch):
+    _patch_tmdb_detail(monkeypatch)
+    alice = await client.post(
+        "/auth/register", json={"username": "alice2", "email": "alice2@example.com", "password": "password123"}
+    )
+    headers_alice = {"Authorization": f"Bearer {alice.json()['access_token']}"}
+    add_resp = await client.post("/library", json={"domain": "movie", "external_id": "155"}, headers=headers_alice)
+    library_id = add_resp.json()["id"]
+    diary_resp = await client.post(
+        f"/library/{library_id}/diary",
+        json={"logged_at": "2024-01-01", "rewatch": True},
+        headers=headers_alice,
+    )
+    entry_id = diary_resp.json()["id"]
+
+    bob = await client.post(
+        "/auth/register", json={"username": "bob2", "email": "bob2@example.com", "password": "password123"}
+    )
+    headers_bob = {"Authorization": f"Bearer {bob.json()['access_token']}"}
+    resp = await client.delete(f"/diary/{entry_id}", headers=headers_bob)
+    assert resp.status_code == 404
+
+    still_there = await client.get(f"/library/{library_id}/diary", headers=headers_alice)
+    assert len(still_there.json()) == 1
