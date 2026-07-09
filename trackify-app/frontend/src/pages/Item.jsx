@@ -10,7 +10,7 @@ import { ReviewCard } from '@/components/reviews/ReviewCard'
 import { ReviewForm } from '@/components/reviews/ReviewForm'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { useDiary, useLogDiaryEntry } from '@/hooks/useDiary'
+import { useDeleteDiaryEntry, useDiary, useLogDiaryEntry } from '@/hooks/useDiary'
 import { useItem } from '@/hooks/useItem'
 import { useAddToLibrary, useLibrary, useUpdateLibraryEntry } from '@/hooks/useLibrary'
 import { useCreateReview, useReviews } from '@/hooks/useReviews'
@@ -31,6 +31,7 @@ export default function Item() {
 
   const { data: diaryEntries } = useDiary(libraryEntry?.id)
   const logDiaryEntry = useLogDiaryEntry(libraryEntry?.id)
+  const deleteDiaryEntry = useDeleteDiaryEntry(libraryEntry?.id)
 
   const { data: reviews } = useReviews(item?.id)
   const createReview = useCreateReview(item?.id)
@@ -78,7 +79,7 @@ export default function Item() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Diary</h2>
           <DiaryEntryForm isSubmitting={logDiaryEntry.isPending} onSubmit={(entry) => logDiaryEntry.mutate(entry)} />
-          <DiaryList entries={diaryEntries ?? []} />
+          <DiaryList entries={diaryEntries ?? []} onDelete={(entryId) => deleteDiaryEntry.mutate(entryId)} />
         </section>
       )}
 
