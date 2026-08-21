@@ -2,11 +2,12 @@ import uuid
 from datetime import date, datetime, timezone
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..models.diary_entry import DiaryEntry
-from ..models.media_item import UserLibrary
+from ..models.favorite import Favorite
+from ..models.media_item import MediaItem, UserLibrary
 from ..models.user import User
 
 
@@ -60,3 +61,30 @@ def apply_updates(library: UserLibrary, updates: dict) -> DiaryEntry | None:
         library.progress_total = updates["progress_total"]
 
     return new_diary_entry
+
+
+async def set_favorites(db: AsyncSession, user: User, item_ids: list[uuid.UUID]) -> list[Favorite]:
+    """Replaces the caller's favorites with the given ordered set (max 4,
+    enforced by the schema's Field(max_length=4) and the favorites table's
+    own CHECK constraint — this is the third, business-logic layer: it also
+    rejects duplicate/unknown item ids before touching the table."""
+    if len(item_ids) != len(set(item_ids)):
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Duplicate items in favorites")
+
+    if item_ids:
+        result = await db.execute(select(MediaItem.id).where(MediaItem.id.in_(item_ids)))
+        found_ids = set(result.scalars().all())
+        missing = [str(item_id) for item_id in item_ids if item_id not in found_ids]
+        if missing:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, f"Unknown item(s): {', '.join(missing)}")
+
+    await db.execute(delete(Favorite).where(Favorite.user_id == user.id))
+    favorites = [
+        Favorite(user_id=user.id, item_id=item_id, position=position)
+        for position, item_id in enumerate(item_ids, start=1)
+    ]
+    db.add_all(favorites)
+    await db.flush()
+    for favorite in favorites:
+        await db.refresh(favorite, attribute_names=["item"])
+    return favorites

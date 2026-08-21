@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+from .favorite import FavoriteRead
+
 
 class UserRegister(BaseModel):
     username: str = Field(min_length=3, max_length=32)
@@ -27,6 +29,12 @@ class UserMe(BaseModel):
     username: str
     email: str
     created_at: datetime
+
+
+class PublicProfileRead(BaseModel):
+    username: str
+    created_at: datetime
+    favorites: list[FavoriteRead]
 
 
 class TokenResponse(BaseModel):
