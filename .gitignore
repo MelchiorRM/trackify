@@ -11,7 +11,7 @@ dist/
 # libs) — built/extracted locally without sudo, see scripts/local-services.sh.
 # Not portable across machines; never commit.
 .local-services/
-
+.vscode/
 # Personal/local Claude Code permission settings — not shared project config.
 settings.local.json
 
