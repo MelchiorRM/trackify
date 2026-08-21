@@ -8,5 +8,6 @@ export const useAuthStore = create((set) => ({
   accessToken: null,
   setAuth: ({ user, accessToken }) => set({ user, accessToken }),
   setAccessToken: (accessToken) => set({ accessToken }),
+  setUser: (user) => set({ user }),
   clearAuth: () => set({ user: null, accessToken: null }),
 }))
