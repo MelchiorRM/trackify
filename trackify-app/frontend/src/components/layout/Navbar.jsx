@@ -31,7 +31,15 @@ export default function Navbar() {
               <Button asChild variant="ghost" size="sm">
                 <Link to="/library">Library</Link>
               </Button>
-              <span className="text-sm text-muted-foreground">{user.username}</span>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/stats">Stats</Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/collections">Collections</Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm">
+                <Link to={`/profile/${user.username}`}>{user.username}</Link>
+              </Button>
               <Button onClick={handleLogout} variant="outline" size="sm">
                 Log out
               </Button>

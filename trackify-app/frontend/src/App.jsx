@@ -6,13 +6,18 @@ import { fetchMe } from '@/api/auth'
 import { apiClient } from '@/api/client'
 import { RequireAuth } from '@/components/common/RequireAuth'
 import Navbar from '@/components/layout/Navbar'
+import CollectionDetail from '@/pages/CollectionDetail'
+import Collections from '@/pages/Collections'
 import Home from '@/pages/Home'
 import Item from '@/pages/Item'
 import Library from '@/pages/Library'
 import Login from '@/pages/Login'
 import NotFound from '@/pages/NotFound'
+import Profile from '@/pages/Profile'
 import Register from '@/pages/Register'
 import SearchPage from '@/pages/Search'
+import Settings from '@/pages/Settings'
+import Stats from '@/pages/Stats'
 import { useAuthStore } from '@/store/authStore'
 
 export default function App() {
@@ -81,6 +86,46 @@ export default function App() {
           element={
             <RequireAuth>
               <Item />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/stats"
+          element={
+            <RequireAuth>
+              <Stats />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile/:username"
+          element={
+            <RequireAuth>
+              <Profile />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/collections"
+          element={
+            <RequireAuth>
+              <Collections />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/collections/:collectionId"
+          element={
+            <RequireAuth>
+              <CollectionDetail />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <RequireAuth>
+              <Settings />
             </RequireAuth>
           }
         />
