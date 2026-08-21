@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
+import { AddToListMenu } from '@/components/collections/AddToListMenu'
 import { DiaryEntryForm } from '@/components/library/DiaryEntryForm'
 import { DiaryList } from '@/components/library/DiaryList'
 import { ProgressBar } from '@/components/library/ProgressBar'
@@ -74,6 +75,8 @@ export default function Item() {
           )}
         </CardContent>
       </Card>
+
+      <AddToListMenu domain={domain} externalId={externalId} />
 
       {libraryEntry && (
         <section className="space-y-3">
