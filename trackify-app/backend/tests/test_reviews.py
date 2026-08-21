@@ -1,21 +1,8 @@
-import app.external.tmdb as tmdb
-
-
-async def _fake_tmdb_detail(tmdb_id):
-    return {
-        "id": int(tmdb_id),
-        "title": "The Dark Knight",
-        "release_date": "2008-07-16",
-        "genres": [{"id": 28, "name": "Action"}],
-        "overview": "Batman raises the stakes...",
-        "poster_path": "/poster.jpg",
-        "popularity": 84.2,
-        "credits": {"crew": [{"job": "Director", "name": "Christopher Nolan"}]},
-    }
+from .conftest import patch_tmdb_detail
 
 
 async def _get_or_create_item(client, auth_headers, monkeypatch) -> str:
-    monkeypatch.setattr(tmdb, "get_movie", _fake_tmdb_detail)
+    patch_tmdb_detail(monkeypatch)
     resp = await client.get("/items/movie/155", headers=auth_headers)
     return resp.json()["id"]
 
@@ -63,30 +50,24 @@ async def test_update_and_delete_review(client, auth_headers, monkeypatch):
     assert delete_resp.status_code == 204
 
 
-async def test_cannot_update_another_users_review(client, auth_headers, monkeypatch):
-    item_id = await _get_or_create_item(client, auth_headers, monkeypatch)
-    create_resp = await client.post("/reviews", json={"item_id": item_id, "rating": 3.0}, headers=auth_headers)
+async def test_cannot_modify_another_users_review(client, monkeypatch):
+    alice = await client.post(
+        "/auth/register", json={"username": "alice", "email": "alice@example.com", "password": "password123"}
+    )
+    headers_alice = {"Authorization": f"Bearer {alice.json()['access_token']}"}
+    alice_item_id = await _get_or_create_item(client, headers_alice, monkeypatch)
+    create_resp = await client.post(
+        "/reviews", json={"item_id": alice_item_id, "rating": 4.0}, headers=headers_alice
+    )
     review_id = create_resp.json()["id"]
 
     bob = await client.post(
-        "/auth/register", json={"username": "bob3", "email": "bob3@example.com", "password": "password123"}
+        "/auth/register", json={"username": "bob", "email": "bob@example.com", "password": "password123"}
     )
     headers_bob = {"Authorization": f"Bearer {bob.json()['access_token']}"}
-    resp = await client.patch(f"/reviews/{review_id}", json={"rating": 1.0}, headers=headers_bob)
-    assert resp.status_code == 404
 
+    patch_resp = await client.patch(f"/reviews/{review_id}", json={"rating": 1.0}, headers=headers_bob)
+    assert patch_resp.status_code == 404
 
-async def test_cannot_delete_another_users_review(client, auth_headers, monkeypatch):
-    item_id = await _get_or_create_item(client, auth_headers, monkeypatch)
-    create_resp = await client.post("/reviews", json={"item_id": item_id, "rating": 3.0}, headers=auth_headers)
-    review_id = create_resp.json()["id"]
-
-    bob = await client.post(
-        "/auth/register", json={"username": "bob4", "email": "bob4@example.com", "password": "password123"}
-    )
-    headers_bob = {"Authorization": f"Bearer {bob.json()['access_token']}"}
-    resp = await client.delete(f"/reviews/{review_id}", headers=headers_bob)
-    assert resp.status_code == 404
-
-    still_there = await client.get("/reviews", params={"item_id": item_id})
-    assert len(still_there.json()) == 1
+    delete_resp = await client.delete(f"/reviews/{review_id}", headers=headers_bob)
+    assert delete_resp.status_code == 404

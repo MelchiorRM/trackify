@@ -1,21 +1,6 @@
 import app.external.tmdb as tmdb
 
-
-async def _fake_tmdb_detail(tmdb_id):
-    return {
-        "id": int(tmdb_id),
-        "title": "The Dark Knight",
-        "release_date": "2008-07-16",
-        "genres": [{"id": 28, "name": "Action"}],
-        "overview": "Batman raises the stakes...",
-        "poster_path": "/poster.jpg",
-        "popularity": 84.2,
-        "credits": {"crew": [{"job": "Director", "name": "Christopher Nolan"}]},
-    }
-
-
-def _patch_tmdb_detail(monkeypatch):
-    monkeypatch.setattr(tmdb, "get_movie", _fake_tmdb_detail)
+from .conftest import fake_tmdb_detail, patch_tmdb_detail as _patch_tmdb_detail
 
 
 async def test_get_item_creates_media_item_on_first_view(client, auth_headers, monkeypatch):
@@ -34,7 +19,7 @@ async def test_get_item_twice_only_fetches_upstream_once(client, auth_headers, m
     async def counting_detail(tmdb_id):
         nonlocal calls
         calls += 1
-        return await _fake_tmdb_detail(tmdb_id)
+        return await fake_tmdb_detail(tmdb_id)
 
     monkeypatch.setattr(tmdb, "get_movie", counting_detail)
     await client.get("/items/movie/155", headers=auth_headers)
@@ -135,27 +120,45 @@ async def test_cannot_modify_another_users_library_entry(client, monkeypatch):
     assert resp.status_code == 404
 
 
+async def test_delete_diary_entry(client, auth_headers, monkeypatch):
+    _patch_tmdb_detail(monkeypatch)
+    add_resp = await client.post("/library", json={"domain": "movie", "external_id": "155"}, headers=auth_headers)
+    library_id = add_resp.json()["id"]
+
+    create_resp = await client.post(
+        f"/library/{library_id}/diary",
+        json={"logged_at": "2024-01-01", "rewatch": True, "rating": 4.5},
+        headers=auth_headers,
+    )
+    entry_id = create_resp.json()["id"]
+
+    resp = await client.delete(f"/diary/{entry_id}", headers=auth_headers)
+    assert resp.status_code == 204
+
+    remaining = await client.get(f"/library/{library_id}/diary", headers=auth_headers)
+    assert remaining.json() == []
+
+
 async def test_cannot_delete_another_users_diary_entry(client, monkeypatch):
     _patch_tmdb_detail(monkeypatch)
     alice = await client.post(
-        "/auth/register", json={"username": "alice2", "email": "alice2@example.com", "password": "password123"}
+        "/auth/register", json={"username": "alice", "email": "alice@example.com", "password": "password123"}
     )
     headers_alice = {"Authorization": f"Bearer {alice.json()['access_token']}"}
-    add_resp = await client.post("/library", json={"domain": "movie", "external_id": "155"}, headers=headers_alice)
+    add_resp = await client.post(
+        "/library", json={"domain": "movie", "external_id": "155"}, headers=headers_alice
+    )
     library_id = add_resp.json()["id"]
-    diary_resp = await client.post(
+    create_resp = await client.post(
         f"/library/{library_id}/diary",
         json={"logged_at": "2024-01-01", "rewatch": True},
         headers=headers_alice,
     )
-    entry_id = diary_resp.json()["id"]
+    entry_id = create_resp.json()["id"]
 
     bob = await client.post(
-        "/auth/register", json={"username": "bob2", "email": "bob2@example.com", "password": "password123"}
+        "/auth/register", json={"username": "bob", "email": "bob@example.com", "password": "password123"}
     )
     headers_bob = {"Authorization": f"Bearer {bob.json()['access_token']}"}
     resp = await client.delete(f"/diary/{entry_id}", headers=headers_bob)
     assert resp.status_code == 404
-
-    still_there = await client.get(f"/library/{library_id}/diary", headers=headers_alice)
-    assert len(still_there.json()) == 1

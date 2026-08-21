@@ -9,6 +9,7 @@ the real redis_client.ping()), so these tests never touch real Redis even
 indirectly.
 """
 
+import app.external.tmdb as tmdb
 import fakeredis.aioredis
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
@@ -72,3 +73,22 @@ async def auth_headers(client):
     )
     token = resp.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
+
+
+async def fake_tmdb_detail(tmdb_id):
+    """Canned TMDB movie-detail response, shared by every test that needs a
+    real media item on hand without hitting the network."""
+    return {
+        "id": int(tmdb_id),
+        "title": "The Dark Knight",
+        "release_date": "2008-07-16",
+        "genres": [{"id": 28, "name": "Action"}],
+        "overview": "Batman raises the stakes...",
+        "poster_path": "/poster.jpg",
+        "popularity": 84.2,
+        "credits": {"crew": [{"job": "Director", "name": "Christopher Nolan"}]},
+    }
+
+
+def patch_tmdb_detail(monkeypatch):
+    monkeypatch.setattr(tmdb, "get_movie", fake_tmdb_detail)
