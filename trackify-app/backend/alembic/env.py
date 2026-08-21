@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -8,7 +9,9 @@ from alembic import context
 
 from app.config import settings
 from app.database import Base
+from app.models.collection import Collection, CollectionItem  # noqa: F401
 from app.models.diary_entry import DiaryEntry  # noqa: F401 — imports register tables on Base.metadata
+from app.models.favorite import Favorite  # noqa: F401
 from app.models.media_item import MediaItem, UserLibrary  # noqa: F401
 from app.models.review import Review  # noqa: F401
 from app.models.user import User  # noqa: F401
@@ -35,6 +38,7 @@ def run_migrations_offline() -> None:
 
     with context.begin_transaction():
         context.run_migrations()
+
 
 def do_run_migrations(connection: Connection) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
