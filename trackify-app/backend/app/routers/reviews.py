@@ -8,6 +8,7 @@ from ..dependencies import get_current_user, get_db
 from ..models.review import Review
 from ..models.user import User
 from ..schemas.review import ReviewCreate, ReviewRead, ReviewUpdate
+from ..services import mention_service
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
@@ -43,8 +44,11 @@ async def create_review(
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "You already reviewed this item")
 
-    review = Review(user_id=current_user.id, **body.model_dump())
+    review = Review(id=uuid.uuid4(), user_id=current_user.id, **body.model_dump())
     db.add(review)
+    await mention_service.create_mentions(
+        db, source_type="review", source_id=review.id, author=current_user, body=review.body
+    )
     await db.commit()
     return review
 
@@ -57,8 +61,13 @@ async def update_review(
     db: AsyncSession = Depends(get_db),
 ) -> Review:
     review = await _get_owned_review(db, current_user, review_id)
-    for field, value in body.model_dump(exclude_unset=True).items():
+    updates = body.model_dump(exclude_unset=True)
+    for field, value in updates.items():
         setattr(review, field, value)
+    if "body" in updates:
+        await mention_service.sync_mentions(
+            db, source_type="review", source_id=review.id, author=current_user, body=review.body
+        )
     await db.commit()
     return review
 
