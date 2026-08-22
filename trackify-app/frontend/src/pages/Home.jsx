@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom'
 
+import { PostComposer } from '@/components/posts/PostComposer'
+import { ActivityFeed } from '@/components/social/ActivityFeed'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useAuthStore } from '@/store/authStore'
 import { DOMAINS, DOMAIN_ICONS } from '@/utils/constants'
 
@@ -41,14 +42,10 @@ export default function Home() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 pt-16">
+    <div className="mx-auto max-w-2xl space-y-6 px-4 py-8">
       <h1 className="text-2xl font-semibold tracking-tight">Welcome back, {user.username}</h1>
-      <Card className="mt-6">
-        <CardContent className="pt-6 text-muted-foreground">
-          Search, library, stats, and recommendations land in later phases — this dashboard is
-          intentionally a stub for now.
-        </CardContent>
-      </Card>
+      <PostComposer />
+      <ActivityFeed />
     </div>
   )
 }
