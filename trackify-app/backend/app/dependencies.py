@@ -40,3 +40,20 @@ async def get_current_user(
     if user is None:
         raise unauthorized
     return user
+
+
+async def get_current_user_optional(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: AsyncSession = Depends(get_db),
+) -> User | None:
+    """Like get_current_user, but returns None instead of 401ing — for
+    endpoints that serve both logged-out and logged-in viewers (e.g. GET
+    /likes on a public post/review), where visibility still needs to be
+    checked against whoever (if anyone) is asking."""
+    if credentials is None:
+        return None
+    try:
+        payload = decode_token(credentials.credentials, expected_type="access")
+    except TokenError:
+        return None
+    return await db.get(User, uuid.UUID(payload["sub"]))
