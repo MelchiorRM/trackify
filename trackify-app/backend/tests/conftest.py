@@ -75,6 +75,19 @@ async def auth_headers(client):
     return {"Authorization": f"Bearer {token}"}
 
 
+@pytest_asyncio.fixture
+async def second_auth_headers(client):
+    """A second freshly-registered user's Authorization header, for tests
+    that need to exercise cross-user behavior (follow, like, comment,
+    mention, repost, message)."""
+    resp = await client.post(
+        "/auth/register",
+        json={"username": "bob", "email": "bob@example.com", "password": "password123"},
+    )
+    token = resp.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
 async def fake_tmdb_detail(tmdb_id):
     """Canned TMDB movie-detail response, shared by every test that needs a
     real media item on hand without hitting the network."""
