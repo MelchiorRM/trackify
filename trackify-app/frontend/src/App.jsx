@@ -12,7 +12,9 @@ import Home from '@/pages/Home'
 import Item from '@/pages/Item'
 import Library from '@/pages/Library'
 import Login from '@/pages/Login'
+import Messages from '@/pages/Messages'
 import NotFound from '@/pages/NotFound'
+import Notifications from '@/pages/Notifications'
 import Profile from '@/pages/Profile'
 import Register from '@/pages/Register'
 import SearchPage from '@/pages/Search'
@@ -126,6 +128,30 @@ export default function App() {
           element={
             <RequireAuth>
               <Settings />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <RequireAuth>
+              <Notifications />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <RequireAuth>
+              <Messages />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/messages/:conversationId"
+          element={
+            <RequireAuth>
+              <Messages />
             </RequireAuth>
           }
         />

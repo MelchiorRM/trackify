@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 
 import { logout as logoutRequest } from '@/api/auth'
 import { SearchBar } from '@/components/common/SearchBar'
+import { MessageBell } from '@/components/messages/MessageBell'
+import { NotificationBell } from '@/components/social/NotificationBell'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/store/authStore'
 
@@ -40,6 +42,8 @@ export default function Navbar() {
               <Button asChild variant="ghost" size="sm">
                 <Link to={`/profile/${user.username}`}>{user.username}</Link>
               </Button>
+              <MessageBell />
+              <NotificationBell />
               <Button onClick={handleLogout} variant="outline" size="sm">
                 Log out
               </Button>
