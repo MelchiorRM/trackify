@@ -1,20 +1,25 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 import { EmptyState } from '@/components/common/EmptyState'
 import { LoadingSpinner } from '@/components/common/LoadingSpinner'
 import { StatusBadge } from '@/components/library/StatusBadge'
 import { DomainBadge } from '@/components/media/DomainBadge'
 import { MediaGrid } from '@/components/media/MediaGrid'
+import { PostCard } from '@/components/posts/PostCard'
 import { FavoritesPicker } from '@/components/profile/FavoritesPicker'
 import { FavoritesRow } from '@/components/profile/FavoritesRow'
+import { FollowButton } from '@/components/social/FollowButton'
 import { Button } from '@/components/ui/button'
+import { useStartConversation } from '@/hooks/useMessages'
+import { useUserPosts } from '@/hooks/usePosts'
 import { useProfile, useProfileLibrary, useProfileReviews } from '@/hooks/useProfile'
 import { useAuthStore } from '@/store/authStore'
 import { formatDate } from '@/utils/formatters'
 
 export default function Profile() {
   const { username } = useParams()
+  const navigate = useNavigate()
   const currentUser = useAuthStore((s) => s.user)
   const isOwnProfile = currentUser?.username === username
   const [view, setView] = useState('grid')
@@ -23,6 +28,14 @@ export default function Profile() {
   const { data: profile, isLoading: profileLoading } = useProfile(username)
   const { data: library, isLoading: libraryLoading } = useProfileLibrary(username)
   const { data: reviews } = useProfileReviews(username)
+  const { data: posts } = useUserPosts(username)
+  const startConversation = useStartConversation()
+
+  const handleMessage = () => {
+    startConversation.mutate(username, {
+      onSuccess: (conversation) => navigate(`/messages/${conversation.id}`),
+    })
+  }
 
   if (profileLoading || !profile) {
     return (
@@ -51,6 +64,14 @@ export default function Profile() {
             </Button>
             <Button size="sm" onClick={() => setEditingFavorites((v) => !v)}>
               {editingFavorites ? 'Close' : 'Edit favorites'}
+            </Button>
+          </div>
+        )}
+        {!isOwnProfile && currentUser && (
+          <div className="flex gap-2">
+            <FollowButton username={username} />
+            <Button size="sm" variant="outline" disabled={startConversation.isPending} onClick={handleMessage}>
+              Message
             </Button>
           </div>
         )}
@@ -105,6 +126,19 @@ export default function Profile() {
                 </Link>
                 <StatusBadge status={entry.status} />
               </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 text-lg font-semibold">Posts</h2>
+        {(posts?.items?.length ?? 0) === 0 ? (
+          <EmptyState title="No posts yet" />
+        ) : (
+          <div className="space-y-3">
+            {posts.items.map((post) => (
+              <PostCard key={post.id} post={post} />
             ))}
           </div>
         )}
