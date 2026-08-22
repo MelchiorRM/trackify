@@ -31,6 +31,16 @@ class UserMe(BaseModel):
     created_at: datetime
 
 
+class UserSummary(BaseModel):
+    """Minimal user identity embedded in social schemas (actor, author,
+    other party in a conversation) — avoids pulling in email/created_at."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    username: str
+
+
 class PublicProfileRead(BaseModel):
     username: str
     created_at: datetime
