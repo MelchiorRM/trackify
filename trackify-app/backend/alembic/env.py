@@ -10,9 +10,18 @@ from alembic import context
 from app.config import settings
 from app.database import Base
 from app.models.collection import Collection, CollectionItem  # noqa: F401
+from app.models.comment import Comment  # noqa: F401
+from app.models.conversation import Conversation  # noqa: F401
 from app.models.diary_entry import DiaryEntry  # noqa: F401 — imports register tables on Base.metadata
 from app.models.favorite import Favorite  # noqa: F401
+from app.models.follow import Follow  # noqa: F401
+from app.models.like import Like  # noqa: F401
 from app.models.media_item import MediaItem, UserLibrary  # noqa: F401
+from app.models.mention import Mention  # noqa: F401
+from app.models.message import Message  # noqa: F401
+from app.models.notification import Notification  # noqa: F401
+from app.models.post import Post  # noqa: F401
+from app.models.repost import Repost  # noqa: F401
 from app.models.review import Review  # noqa: F401
 from app.models.user import User  # noqa: F401
 
