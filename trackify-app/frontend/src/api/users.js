@@ -14,3 +14,6 @@ export const fetchUserCollections = (username) =>
 
 export const fetchUserDiary = (username, params = {}) =>
   apiClient.get(`/users/${username}/diary`, { params }).then((r) => r.data)
+
+export const fetchUserPosts = (username, params = {}) =>
+  apiClient.get(`/users/${username}/posts`, { params }).then((r) => r.data)
